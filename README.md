@@ -4,10 +4,20 @@ A GitHub Action for syncing between two independent repositories using **force p
 
 ## Features
 
-- Sync branches between two GitHub repositories
-- Sync branches to/from a remote repository
+- Sync two GitHub repositories
+- Sync a remote repository
 - GitHub action can be triggered on a timer or on push
 - To sync with current repository, please checkout [Github Repo Sync](https://github.com/marketplace/actions/github-repo-sync)
+- To sync only selected branches, please checkout [Wei's Git Sync](https://github.com/marketplace/actions/git-sync-action)
+
+## About this fork
+
+This is based on [Wei's Git Sync](https://github.com/marketplace/actions/git-sync-action),
+but differs by using gits `--mirror` flag, thus reproducing all branches and
+tags on the destination.
+
+> **WARNING:** This will also delete branches and tags at the destination if they don't exist
+at the source!
 
 ## Usage
 
@@ -24,12 +34,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: git-sync
-        uses: wei/git-sync@v3
+        uses: uFahrrad/git-sync@v4
         with:
           source_repo: "source_org/repository"
-          source_branch: "main"
           destination_repo: "destination_org/repository"
-          destination_branch: "main"
           ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }} # optional
           source_ssh_private_key: ${{ secrets.SOURCE_SSH_PRIVATE_KEY }} # optional, will override `SSH_PRIVATE_KEY`
           destination_ssh_private_key: ${{ secrets.DESTINATION_SSH_PRIVATE_KEY }} # optional, will override `SSH_PRIVATE_KEY`
@@ -79,34 +87,18 @@ $ ssh-keygen -t rsa -b 4096 -C "your_email@example.com"
 
 - Add the private key(s) to _Repo > Settings > Secrets_ for the repository containing the action (`SSH_PRIVATE_KEY`, or `SOURCE_SSH_PRIVATE_KEY` and `DESTINATION_SSH_PRIVATE_KEY`)
 
-#### Advanced: Sync all branches
-
-To Sync all branches from source to destination, use `source_branch: "refs/remotes/source/*"` and `destination_branch: "refs/heads/*"`. But be careful, branches with the same name including `master` will be overwritten.
-
-```yml
-source_branch: "refs/remotes/source/*"
-destination_branch: "refs/heads/*"
-```
-
-#### Advanced: Sync all tags
-
-To Sync all tags from source to destination, use `source_branch: "refs/tags/*"` and `destination_branch: "refs/tags/*"`. But be careful, tags with the same name will be overwritten.
-
-```yml
-source_branch: "refs/tags/*"
-destination_branch: "refs/tags/*"
-```
-
 ### Docker
 
 ```sh
 $ docker run --rm -e "SSH_PRIVATE_KEY=$(cat ~/.ssh/id_rsa)" $(docker build -q .) \
-  $SOURCE_REPO $SOURCE_BRANCH $DESTINATION_REPO $DESTINATION_BRANCH
+  $SOURCE_REPO $DESTINATION_REPO
 ```
 
 ## Author
 
 [Wei He](https://github.com/wei) _github@weispot.com_
+
+Adapted by [Daniel Wagenknecht](https://github.com/dwagenk)
 
 ## License
 
